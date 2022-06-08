@@ -200,6 +200,17 @@ app.post('/api/signup', async (req, res) => {
 	}
 });
 
+app.post('/api/logout', (req, res) => {
+	req.session.destroy(err => {
+		if (err) {
+			return res.status(400).json({
+				message: 'There was a problem logging out'
+			});
+		}
+		res.json({ message: 'Log out successful' });
+	});
+});
+
 app.get('/api/token/refresh', async (req, res) => {
 	try {
 		const { refreshToken } = req.cookies;
