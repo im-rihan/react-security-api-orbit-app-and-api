@@ -31,7 +31,7 @@ app.use(cookieParser());
 
 app.use(
 	session({
-		store: new FileStore({}),
+		// store: new FileStore({}),
 		secret: process.env.SESSION_SECRET,
 		resave: false,
 		saveUninitialized: false,
@@ -48,6 +48,10 @@ app.use(
 	})
 );
 
+app.use((req, res, next) => {
+	console.log(req.session);
+	next();
+})
 
 const saveRefreshToken = async (refreshToken, userId) => {
 	try {
@@ -96,6 +100,8 @@ app.post('/api/authenticate', async (req, res) => {
 				httpOnly: true,
 				maxAge: oneWeek
 			})
+
+			req.session.user = userInfo;
 
 			res.json({
 				message: 'Authentication successful!',
@@ -164,6 +170,8 @@ app.post('/api/signup', async (req, res) => {
 				email,
 				role
 			};
+
+			req.session.user = userInfo;
 
 			const refreshToken = getRefreshToken();
 
@@ -239,36 +247,19 @@ app.delete('/api/token/invalidate', async (req, res) => {
 	}
 })
 
-const attachUser = (req, res, next) => {
-	const token = req.headers.authorization;
-	if (!token) {
+const requireAuth = (req, res, next) => {
+	const { user } = req.session;
+	if (!user) {
 		return res
 			.status(401)
-			.json({ message: 'Authentication invalid' });
+			.json({ message: 'Unauthorized' });
 	}
-	const decodedToken = jwtDecode(token.slice(7));
-
-	if (!decodedToken) {
-		return res.status(401).json({
-			message: 'There was a problem authorizing the request'
-		});
-	} else {
-		req.user = decodedToken;
-		next();
-	}
+	next();
 };
 
-app.use(attachUser);
-
-const requireAuth = jwt({
-	secret: process.env.JWT_SECRET,
-	audience: 'api.orbit',
-	issuer: 'api.orbit'
-});
-
 const requireAdmin = (req, res, next) => {
-	const { role } = req.user;
-	if (role !== 'admin') {
+	const { user } = req.session;
+	if (user.role !== 'admin') {
 		return res
 			.status(401)
 			.json({ message: 'Insufficient role' });
@@ -283,6 +274,7 @@ app.get('/api/dashboard-data', requireAuth, (req, res) =>
 app.patch('/api/user-role', async (req, res) => {
 	try {
 		const { role } = req.body;
+		const { user } = req.session;
 		const allowedRoles = ['user', 'admin'];
 
 		if (!allowedRoles.includes(role)) {
@@ -291,12 +283,14 @@ app.patch('/api/user-role', async (req, res) => {
 				.json({ message: 'Role not allowed' });
 		}
 		await User.findOneAndUpdate(
-			{ _id: req.user.sub },
+			{ _id: user._id },
 			{ role }
 		);
+
+		req.session.user.role = role;
 		res.json({
-			message:
-				'User role updated. You must log in again for the changes to take effect.'
+			message: 'User role updated.',
+			user: req.session.user
 		});
 	} catch (err) {
 		return res.status(400).json({ error: err });
@@ -309,9 +303,9 @@ app.get(
 	requireAdmin,
 	async (req, res) => {
 		try {
-			const user = req.user.sub;
+			const { user } = req.session;
 			const inventoryItems = await InventoryItem.find({
-				user
+				user: user._id
 			});
 			res.json(inventoryItems);
 		} catch (err) {
@@ -326,9 +320,9 @@ app.post(
 	requireAdmin,
 	async (req, res) => {
 		try {
-			const userId = req.user.sub;
+			const { user } = req.session;
 			const input = Object.assign({}, req.body, {
-				user: userId
+				user: user._id
 			});
 			const inventoryItem = new InventoryItem(input);
 			await inventoryItem.save();
@@ -350,8 +344,9 @@ app.delete(
 	requireAdmin,
 	async (req, res) => {
 		try {
+			const { user } = req.session;
 			const deletedItem = await InventoryItem.findOneAndDelete(
-				{ _id: req.params.id, user: req.user.sub }
+				{ _id: req.params.id, user: user._id }
 			);
 			res.status(201).json({
 				message: 'Inventory item deleted!',
@@ -383,15 +378,15 @@ app.get('/api/users', requireAuth, async (req, res) => {
 
 app.get('/api/bio', requireAuth, async (req, res) => {
 	try {
-		const { sub } = req.user;
-		const user = await User.findOne({
-			_id: sub
+		const { user } = req.session;
+		const authenticatedUser = await User.findOne({
+			_id: user._id
 		})
 			.lean()
 			.select('bio');
 
 		res.json({
-			bio: user.bio
+			bio: authenticatedUser.bio
 		});
 	} catch (err) {
 		return res.status(400).json({
@@ -402,11 +397,11 @@ app.get('/api/bio', requireAuth, async (req, res) => {
 
 app.patch('/api/bio', requireAuth, async (req, res) => {
 	try {
-		const { sub } = req.user;
+		const { user } = req.session;
 		const { bio } = req.body;
 		const updatedUser = await User.findOneAndUpdate(
 			{
-				_id: sub
+				_id: user._id
 			},
 			{
 				bio
