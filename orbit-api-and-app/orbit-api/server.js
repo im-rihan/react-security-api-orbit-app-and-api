@@ -6,6 +6,7 @@ const jwt = require('express-jwt');
 const cookieParser = require('cookie-parser');
 const jwtDecode = require('jwt-decode');
 const mongoose = require('mongoose');
+const session = require('express-session');
 
 const dashboardData = require('./data/dashboard');
 const User = require('./data/User');
@@ -27,6 +28,26 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+app.use(
+	session({
+		store: new FileStore({}),
+		secret: process.env.SESSION_SECRET,
+		resave: false,
+		saveUninitialized: false,
+		rolling: true,
+		cookie: {
+			httpOnly: true,
+			sameSite: true,
+			secure:
+				process.env.NODE_ENV === 'production'
+					? true
+					: false,
+			maxAge: parseInt(process.env.SESSION_MAX_AGE)
+		}
+	})
+);
+
 
 const saveRefreshToken = async (refreshToken, userId) => {
 	try {
