@@ -278,6 +278,18 @@ const requireAdmin = (req, res, next) => {
 	next();
 };
 
+app.get('/api/user-info', (req, res) => {
+	const { user } = req.session;
+	if (!user) {
+		return res
+			.status(401)
+			.json({ message: 'Unauthorized' });
+	}
+	setTimeout(() => {
+		res.json({ user });
+	}, 1000);
+})
+
 app.get('/api/dashboard-data', requireAuth, (req, res) =>
 	res.json(dashboardData)
 );
