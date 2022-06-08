@@ -6,7 +6,7 @@ import GradientBar from './../components/common/GradientBar';
 import logo from './../images/logo.png';
 
 const Home = () => {
-	const auth = useContext(AuthContext);
+	const authState = useContext(AuthContext);
 
 	return (
 		<>
@@ -27,7 +27,7 @@ const Home = () => {
 						</Link>
 						<GradientLink
 							to={
-								auth.isAuthenticated()
+								authState.isAuthenticated
 									? '/dashboard'
 									: '/login'
 							}
@@ -57,7 +57,7 @@ const Home = () => {
 								text="Get Started"
 								size="lg"
 								to={
-									auth.isAuthenticated()
+									authState.isAuthenticated
 										? '/dashboard'
 										: '/login'
 								}

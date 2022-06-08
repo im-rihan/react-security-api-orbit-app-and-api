@@ -1,7 +1,5 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext } from 'react';
 import axios from 'axios';
-import { AuthContext } from './AuthContext';
-import createAuthRefreshInterceptor from 'axios-auth-refresh';
 
 const FetchContext = createContext();
 const { Provider } = FetchContext;
