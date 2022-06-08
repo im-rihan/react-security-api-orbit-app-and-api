@@ -7,34 +7,33 @@ const FetchContext = createContext();
 const { Provider } = FetchContext;
 
 const FetchProvider = ({ children }) => {
-	const authContext = useContext(AuthContext);
-
 	const authAxios = axios.create({
 		baseURL: process.env.REACT_APP_API_URL
 	});
 
-	authAxios.interceptors.request.use(
-		config => {
-			config.headers.Authorization = `Bearer ${authContext.getAccessToken()}`;
-			return config;
+	const publicAxios = axios.create({
+		baseURL: process.env.REACT_APP_API_URL
+	});
+
+	authAxios.interceptors.response.use(
+		response => {
+			return response;
 		},
 		error => {
+			const code =
+				error && error.response ? error.response.status : 0;
+			if (code === 401 || code === 403) {
+				console.log('error code', code);
+			}
 			return Promise.reject(error);
 		}
 	);
 
-	createAuthRefreshInterceptor(
-		authAxios,
-		authContext.getNewTokenForRequest,
-		{
-			skipWhileRefreshing: false
-		}
-	)
-
 	return (
 		<Provider
 			value={{
-				authAxios
+				authAxios,
+				publicAxios
 			}}
 		>
 			{children}
