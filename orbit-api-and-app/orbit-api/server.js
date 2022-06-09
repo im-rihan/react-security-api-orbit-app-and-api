@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const jwtDecode = require('jwt-decode');
 const mongoose = require('mongoose');
 const session = require('express-session');
-
+const csrf = require('csurf');
 const dashboardData = require('./data/dashboard');
 const User = require('./data/User');
 const Token = require('./data/Token');
@@ -47,6 +47,15 @@ app.use(
 		}
 	})
 );
+
+const csrfProtection = csrf({
+	cookie: true
+});
+app.use(csrfProtection);
+
+app.get('/api/csrf-token', (req, res) => {
+	res.json({ csrfToken: req.csrfToken() });
+});
 
 app.use((req, res, next) => {
 	console.log(req.session);
