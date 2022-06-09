@@ -95,28 +95,27 @@ app.post('/api/authenticate', async (req, res) => {
 		);
 
 		if (passwordValid) {
-			const { password, bio, ...rest } = user;
-			const userInfo = Object.assign({}, { ...rest });
+			const {
+				_id,
+				firstName,
+				lastName,
+				email,
+				role
+			} = user;
 
-			const token = createToken(userInfo);
-			const expiresAt = getDatePlusOneWeek();
-
-			const refreshToken = getRefreshToken();
-
-			await saveRefreshToken(refreshToken, userInfo._id);
-
-			res.cookie('refreshToken', refreshToken, {
-				httpOnly: true,
-				maxAge: oneWeek
-			})
+			const userInfo = {
+				_id,
+				firstName,
+				lastName,
+				email,
+				role
+			};
 
 			req.session.user = userInfo;
 
 			res.json({
 				message: 'Authentication successful!',
-				token,
 				userInfo,
-				expiresAt
 			});
 		} else {
 			res.status(403).json({
@@ -161,9 +160,6 @@ app.post('/api/signup', async (req, res) => {
 		const savedUser = await newUser.save();
 
 		if (savedUser) {
-			const token = createToken(savedUser);
-			const expiresAt = getDatePlusOneWeek();
-
 			const {
 				_id,
 				firstName,
@@ -182,20 +178,9 @@ app.post('/api/signup', async (req, res) => {
 
 			req.session.user = userInfo;
 
-			const refreshToken = getRefreshToken();
-
-			await saveRefreshToken(refreshToken, userInfo._id);
-
-			res.cookie('refreshToken', refreshToken, {
-				httpOnly: true,
-				maxAge: oneWeek
-			})
-
 			return res.json({
 				message: 'User created!',
-				token,
 				userInfo,
-				expiresAt
 			});
 		} else {
 			return res.status(400).json({
