@@ -4,9 +4,12 @@ import { AuthContext } from './../context/AuthContext';
 import GradientLink from '../components/common/GradientLink';
 import GradientBar from './../components/common/GradientBar';
 import logo from './../images/logo.png';
+import { useAuth0 } from '@auth0/auth0-react';
+import GradientButton from './../components/common/GradientButton';
 
 const Home = () => {
 	const authState = useContext(AuthContext);
+	const { loginWithRedirect } = useAuth0()
 
 	return (
 		<>
@@ -25,12 +28,8 @@ const Home = () => {
 						>
 							Sign Up
 						</Link>
-						<GradientLink
-							to={
-								authState.isAuthenticated
-									? '/dashboard'
-									: '/login'
-							}
+						<GradientButton
+							onClick={loginWithRedirect}
 							text="Log In"
 						/>
 					</div>
