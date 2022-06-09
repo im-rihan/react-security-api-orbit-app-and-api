@@ -9,10 +9,10 @@ import FormSuccess from './../components/FormSuccess';
 import FormError from './../components/FormError';
 import GradientBar from './../components/common/GradientBar';
 import { AuthContext } from '../context/AuthContext';
-import { publicFetch } from './../util/fetch';
 import { Redirect } from 'react-router-dom';
 import GradientButton from '../components/common/GradientButton';
 import logo from './../images/logo.png';
+import { FetchContext } from '../context/FetchContext';
 
 const LoginSchema = Yup.object().shape({
 	email: Yup.string().required('Email is required'),
@@ -21,6 +21,7 @@ const LoginSchema = Yup.object().shape({
 
 const Login = () => {
 	const authContext = useContext(AuthContext);
+	const fetchContext = useContext(FetchContext);
 	const [loginSuccess, setLoginSuccess] = useState();
 	const [loginError, setLoginError] = useState();
 	const [redirectOnLogin, setRedirectOnLogin] = useState(
@@ -31,7 +32,7 @@ const Login = () => {
 	const submitCredentials = async credentials => {
 		try {
 			setLoginLoading(true);
-			const { data } = await publicFetch.post(
+			const { data } = await fetchContext.publicAxios.post(
 				`authenticate`,
 				credentials
 			);
