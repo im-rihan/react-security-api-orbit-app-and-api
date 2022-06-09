@@ -36,12 +36,12 @@ app.use(
 		secret: process.env.SESSION_SECRET,
 		resave: false,
 		saveUninitialized: false,
-		rolling: true,
+		rolling: true,   //  Strengthen the Session Cookie
 		cookie: {
 			httpOnly: true,
-			sameSite: true,
+			sameSite: true,    //  Strengthen the Session Cookie
 			secure:
-				process.env.NODE_ENV === 'production'
+				process.env.NODE_ENV === 'production'			//  Strengthen the Session Cookie
 					? true
 					: false,
 			maxAge: parseInt(process.env.SESSION_MAX_AGE)
