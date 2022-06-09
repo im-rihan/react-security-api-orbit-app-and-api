@@ -12,6 +12,7 @@ const dashboardData = require('./data/dashboard');
 const User = require('./data/User');
 const Token = require('./data/Token');
 const InventoryItem = require('./data/InventoryItem');
+const FileStore = require('session-file-store')(session);
 
 const {
 	createToken,
@@ -31,7 +32,7 @@ app.use(cookieParser());
 
 app.use(
 	session({
-		// store: new FileStore({}),
+		store: new FileStore({}),
 		secret: process.env.SESSION_SECRET,
 		resave: false,
 		saveUninitialized: false,
@@ -61,19 +62,6 @@ app.use((req, res, next) => {
 	console.log(req.session);
 	next();
 })
-
-const saveRefreshToken = async (refreshToken, userId) => {
-	try {
-		const storedRefreshToken = new Token({
-			refreshToken,
-			user: userId,
-			expiresAt: getDatePlusOneWeek()
-		});
-		return await storedRefreshToken.save();
-	} catch (error) {
-		return error;
-	}
-}
 
 app.post('/api/authenticate', async (req, res) => {
 	try {
