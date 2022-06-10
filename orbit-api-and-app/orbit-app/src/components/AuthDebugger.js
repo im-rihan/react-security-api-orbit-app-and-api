@@ -1,4 +1,5 @@
-import React, { useContext } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './../context/AuthContext';
 import GradientButton from './common/GradientButton';
 
@@ -12,25 +13,28 @@ const AuthStateItem = ({ title, value }) => (
 );
 
 const AuthDebugger = () => {
-	const authContext = useContext(AuthContext);
-	const {
-		token,
-		expiresAt,
-		userInfo
-	} = authContext.authState;
+	const { getAccessTokenSilently, user } = useAuth0();
+	const [accessToken, setAccessToken] = useState();
+	useEffect(() => {
+		const getAccessToken = async () => {
+			try {
+				const token = await getAccessTokenSilently();
+				setAccessToken(token);
+			} catch (err) {
+				console.log(err);
+			}
+		};
+		getAccessToken();
+	}, [getAccessTokenSilently]);
 	return (
 		<section className="rounded-lg shadow bg-white p-4">
 			<div className="mb-2">
-				<AuthStateItem title="Token" value={token} />
-				<GradientButton text='Get New Token' onClick={authContext.getNewToken} />
-			</div>
-			<div className="mb-2">
-				<AuthStateItem title="Expiry" value={expiresAt} />
+				<AuthStateItem title="Token" value={accessToken} />
 			</div>
 			<div className="mb-2">
 				<AuthStateItem
 					title="User Info"
-					value={JSON.stringify(userInfo, null, 2)}
+					value={JSON.stringify(user, null, 2)}
 				/>
 			</div>
 		</section>
