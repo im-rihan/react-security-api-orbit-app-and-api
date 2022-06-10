@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const jwt = require('express-jwt');
+const jwks = require('jwks-rsa')
 const cookieParser = require('cookie-parser');
 const jwtDecode = require('jwt-decode');
 const mongoose = require('mongoose');
@@ -240,15 +241,17 @@ app.delete('/api/token/invalidate', async (req, res) => {
 	}
 })
 
-const requireAuth = (req, res, next) => {
-	const { user } = req.session;
-	if (!user) {
-		return res
-			.status(401)
-			.json({ message: 'Unauthorized' });
-	}
-	next();
-};
+var requireAuth = jwt({
+	secret: jwks.expressJwtSecret({
+		cache: true,
+		rateLimit: true,
+		jwksRequestsPerMinute: 5,
+		jwksUri: 'https://dev-y0gsfk9p.us.auth0.com/.well-known/jwks.json'
+	}),
+	audience: 'https://orbit.api/',
+	issuer: 'https://dev-y0gsfk9p.us.auth0.com/',
+	algorithms: ['RS256']
+});
 
 const requireAdmin = (req, res, next) => {
 	const { user } = req.session;
