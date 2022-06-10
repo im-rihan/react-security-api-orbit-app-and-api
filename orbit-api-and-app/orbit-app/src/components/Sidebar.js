@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import classNames from 'classnames';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -73,8 +74,10 @@ const NavItemContainer = ({ children }) => (
 );
 
 const Sidebar = () => {
-	const auth = useContext(AuthContext);
-	const { role } = auth.authState.userInfo;
+	const { user } = useAuth0();
+	console.log(user);
+	const roles = user[`https://orbit.api/roles`];
+	console.log(roles)
 	return (
 		<section className="h-screen">
 			<div className="w-16 sm:w-24 m-auto">
@@ -83,7 +86,7 @@ const Sidebar = () => {
 			<div className="mt-20">
 				{navItems.map((navItem, i) => (
 					<NavItemContainer key={i}>
-						{navItem.allowedRoles.includes(role) && (
+						{navItem.allowedRoles.includes(roles[0]) && (
 							<NavItem navItem={navItem} />
 						)}
 					</NavItemContainer>
