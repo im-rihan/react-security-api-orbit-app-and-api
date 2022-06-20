@@ -1,4 +1,8 @@
-import React, { lazy, Suspense, useContext } from 'react';
+import React, { lazy, Suspense } from 'react';
+import {
+	Auth0Provider,
+	useAuth0
+} from '@auth0/auth0-react';
 import {
 	BrowserRouter as Router,
 	Route,
@@ -6,19 +10,11 @@ import {
 	Redirect
 } from 'react-router-dom';
 import './App.css';
-import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
-
-import {
-	AuthProvider,
-	AuthContext
-} from './context/AuthContext';
 import { FetchProvider } from './context/FetchContext';
 
 import AppShell from './AppShell';
 
 import Home from './pages/Home';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
 import FourOFour from './pages/FourOFour';
 
 import logo from './images/logo.png';
@@ -37,12 +33,6 @@ const LoadingFallback = () => (
 
 const UnauthenticatedRoutes = () => (
 	<Switch>
-		<Route path="/login">
-			<Login />
-		</Route>
-		<Route path="/signup">
-			<Signup />
-		</Route>
 		<Route exact path="/">
 			<Home />
 		</Route>
@@ -71,13 +61,15 @@ const AuthenticatedRoute = ({ children, ...rest }) => {
 };
 
 const AdminRoute = ({ children, ...rest }) => {
-	const { authState } = useContext(AuthContext);
+	const { user, isAuthenticated } = useAuth0();
+	const roles =
+		user[`${process.env.REACT_APP_JWT_NAMESPACE}/roles`];
+	const isAdmin = roles[0] === 'admin' ? true : false;
 	return (
 		<Route
 			{...rest}
 			render={() =>
-				authState.isAuthenticated &&
-					authState.userInfo.role === 'admin' ? (
+				isAuthenticated && isAdmin ? (
 					<AppShell>{children}</AppShell>
 				) : (
 					<Redirect to="/" />
@@ -130,6 +122,17 @@ const AppRoutes = () => {
 	);
 };
 
+const requestedScopes = [
+	'read:dashboard',
+	'read:inventory',
+	'write:inventory',
+	'edit:inventory',
+	'delete:inventory',
+	'read:users',
+	'read:user',
+	'edit:user'
+];
+
 function App() {
 	return (
 		<Auth0Provider
@@ -137,14 +140,13 @@ function App() {
 			clientId={process.env.REACT_APP_AUTH0_CLIENT_ID}
 			redirectUri={`${window.location.origin}/dashboard`}
 			audience={process.env.REACT_APP_AUTH0_AUDIENCE}
+			scope={requestedScopes.join(' ')}
 		>
 			<Router>
 				<FetchProvider>
-					<AuthProvider>
-						<div className="bg-gray-100">
-							<AppRoutes />
-						</div>
-					</AuthProvider>
+					<div className="bg-gray-100">
+						<AppRoutes />
+					</div>
 				</FetchProvider>
 			</Router>
 		</Auth0Provider>

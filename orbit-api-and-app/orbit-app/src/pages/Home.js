@@ -1,15 +1,13 @@
-import React, { useContext } from 'react';
+import React from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
-import { AuthContext } from './../context/AuthContext';
 import GradientLink from '../components/common/GradientLink';
+import GradientButton from '../components/common/GradientButton';
 import GradientBar from './../components/common/GradientBar';
 import logo from './../images/logo.png';
-import { useAuth0 } from '@auth0/auth0-react';
-import GradientButton from './../components/common/GradientButton';
 
 const Home = () => {
-	const authState = useContext(AuthContext);
-	const { loginWithRedirect } = useAuth0()
+	const { isAuthenticated, loginWithRedirect } = useAuth0();
 
 	return (
 		<>
@@ -28,10 +26,17 @@ const Home = () => {
 						>
 							Sign Up
 						</Link>
-						<GradientButton
-							onClick={loginWithRedirect}
-							text="Log In"
-						/>
+						{isAuthenticated ? (
+							<GradientLink
+								to="/dashboard"
+								text="Go to Dashboard"
+							/>
+						) : (
+							<GradientButton
+								onClick={loginWithRedirect}
+								text="Log In"
+							/>
+						)}
 					</div>
 				</div>
 			</div>
@@ -52,15 +57,17 @@ const Home = () => {
 							Take the pain out of managing your sales data
 						</h2>
 						<div className="mt-4 sm:mt-10 w-48">
-							<GradientLink
-								text="Get Started"
-								size="lg"
-								to={
-									authState.isAuthenticated
-										? '/dashboard'
-										: '/login'
-								}
-							/>
+							{isAuthenticated ? (
+								<GradientLink
+									to="/dashboard"
+									text="Go to Dashboard"
+								/>
+							) : (
+								<GradientButton
+									onClick={loginWithRedirect}
+									text="Get Started"
+								/>
+							)}
 						</div>
 					</div>
 				</div>

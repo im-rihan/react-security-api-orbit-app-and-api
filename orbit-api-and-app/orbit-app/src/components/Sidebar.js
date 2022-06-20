@@ -1,17 +1,16 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import classNames from 'classnames';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-	faChartLine,
 	faAddressCard,
+	faChartLine,
 	faChartPie,
 	faCogs,
 	faDoorOpen
 } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import classNames from 'classnames';
 import { Link, useLocation } from 'react-router-dom';
 import logo from './../images/logo.png';
-import { AuthContext } from './../context/AuthContext';
 
 const navItems = [
 	{
@@ -75,9 +74,8 @@ const NavItemContainer = ({ children }) => (
 
 const Sidebar = () => {
 	const { user } = useAuth0();
-	console.log(user);
-	const roles = user[`https://orbit.api/roles`];
-	console.log(roles)
+	const roles =
+		user[`${process.env.REACT_APP_JWT_NAMESPACE}/roles`];
 	return (
 		<section className="h-screen">
 			<div className="w-16 sm:w-24 m-auto">

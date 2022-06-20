@@ -1,7 +1,5 @@
+import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import React, { useContext, useEffect, useState } from 'react';
-import { AuthContext } from './../context/AuthContext';
-import GradientButton from './common/GradientButton';
 
 const AuthStateItem = ({ title, value }) => (
 	<div className="text-sm">

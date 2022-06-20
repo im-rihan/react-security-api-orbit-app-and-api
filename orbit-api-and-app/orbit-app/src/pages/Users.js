@@ -3,11 +3,11 @@ import React, {
 	useEffect,
 	useState
 } from 'react';
+import DOMPurify from 'dompurify';
+import Card from '../components/common/Card';
 import PageTitle from '../components/common/PageTitle';
 import { FetchContext } from '../context/FetchContext';
-import Card from '../components/common/Card';
 import defaultAvatar from './../images/defaultAvatar.png';
-import DOMPurify from 'dompurify';
 
 const UserDetailLabel = ({ text }) => (
 	<p className="mt-2 uppercase font-bold text-gray-500 text-xs">

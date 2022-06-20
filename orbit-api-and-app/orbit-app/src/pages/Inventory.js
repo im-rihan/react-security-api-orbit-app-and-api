@@ -5,11 +5,11 @@ import React, {
 } from 'react';
 import PageTitle from '../components/common/PageTitle';
 import { FetchContext } from '../context/FetchContext';
-import { formatCurrency } from './../util';
-import InventoryItemForm from './../components/InventoryItemForm';
 import DangerButton from './../components/common/DangerButton';
 import FormError from './../components/FormError';
 import FormSuccess from './../components/FormSuccess';
+import InventoryItemForm from './../components/InventoryItemForm';
+import { formatCurrency } from './../util';
 
 const InventoryItemContainer = ({ children }) => (
 	<div className="bg-white rounded shadow-md mb-4 p-4">

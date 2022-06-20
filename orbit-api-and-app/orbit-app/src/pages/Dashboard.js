@@ -1,19 +1,19 @@
 import React, {
-	useState,
 	useContext,
-	useEffect
+	useEffect,
+	useState
 } from 'react';
-import PageTitle from '../components/common/PageTitle';
-import DashboardMetric from './../components/DashboardMetric';
-import Card from '../components/common/Card';
 import {
 	faChartArea,
 	faDollarSign,
 	faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
+import Card from '../components/common/Card';
+import PageTitle from '../components/common/PageTitle';
 import { FetchContext } from '../context/FetchContext';
-import { formatCurrency } from './../util';
 import DashboardChart from './../components/DashboardChart';
+import DashboardMetric from './../components/DashboardMetric';
+import { formatCurrency } from './../util';
 
 const Dashboard = () => {
 	const fetchContext = useContext(FetchContext);
